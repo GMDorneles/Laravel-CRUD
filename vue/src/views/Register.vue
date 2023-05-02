@@ -1,13 +1,3 @@
-<script setup>
-import { ref } from "vue";
-
-defineProps({
-  msg: String,
-});
-
-const count = ref(0);
-</script>
-
 <template>
   <div>
     <img
@@ -30,7 +20,7 @@ const count = ref(0);
     </p>
   </div>
   <form class="mt-8 space-y-6" @submit="register">
-    <!-- <Alert
+    <Alert
       v-if="Object.keys(errors).length"
       class="flex-col items-stretch text-sm"
     >
@@ -39,19 +29,19 @@ const count = ref(0);
           * {{ error }}
         </div>
       </div>
-    </Alert> -->
+    </Alert>
 
     <input type="hidden" name="remember" value="true" />
     <div class="rounded-md shadow-sm -space-y-px">
       <div>
         <label for="fullname" class="sr-only">Email address</label>
-        <!-- v-model="user.name" -->
         <input
           id="fullname"
           name="name"
           type="text"
           autocomplete="name"
           required=""
+          v-model="user.name"
           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="Full name"
         />
@@ -64,11 +54,11 @@ const count = ref(0);
           type="email"
           autocomplete="email"
           required=""
+          v-model="user.email"
           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+          :class="{ 'border-red-500': errors.email, 'z-10': errors.email }"
           placeholder="Email address"
         />
-        <!-- v-model="user.email" -->
-        <!-- :class="{ 'border-red-500': errors.email, 'z-10': errors.email }" -->
       </div>
       <div>
         <label for="password" class="sr-only">Password</label>
@@ -78,8 +68,13 @@ const count = ref(0);
           type="password"
           autocomplete="current-password"
           required=""
+          v-model="user.password"
           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="Password"
+          :class="{
+            'border-red-500': errors.password,
+            'z-10': errors.password,
+          }"
         />
       </div>
       <div>
@@ -90,10 +85,10 @@ const count = ref(0);
           type="password"
           autocomplete="current-password"
           required=""
+          v-model="user.password_confirmation"
           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="Confirm Password"
         />
-        <!-- v-model="user.password_confirmation" -->
       </div>
     </div>
 
@@ -107,12 +102,6 @@ const count = ref(0);
           'hover:bg-indigo-500': loading,
         }"
       >
-        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-          <LockClosedIcon
-            class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-            aria-hidden="true"
-          />
-        </span>
         <svg
           v-if="loading"
           class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -140,8 +129,36 @@ const count = ref(0);
   </form>
 </template>
 
-<style scoped>
-.read-the-docs {
-  color: #888;
+<script setup>
+import { ref } from "vue";
+import store from "../store";
+import { useRouter } from "vue-router";
+import Alert from "../components/Alert.vue";
+const router = useRouter();
+const user = {
+  name: "",
+  email: "",
+  password: "",
+};
+const loading = ref(false);
+const errors = ref({});
+function register(ev) {
+  ev.preventDefault();
+  loading.value = true;
+  store
+    .dispatch("register", user)
+    .then(() => {
+      loading.value = false;
+      router.push({
+        name: "Dashboard",
+      });
+    })
+    .catch((error) => {
+      loading.value = false;
+      console.log(error);
+      // if (error.response.status === 422) {
+      //   errors.value = error.response.data.errors;
+      // }
+    });
 }
-</style>
+</script>

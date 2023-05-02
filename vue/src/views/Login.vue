@@ -1,5 +1,37 @@
 <script setup>
+// import { LockClosedIcon } from "@heroicons/vue/solid";
 import { ref } from "vue";
+import store from "../store";
+import { useRouter } from "vue-router";
+import Alert from "../components/Alert.vue";
+
+const router = useRouter();
+
+const user = {
+  email: "",
+  password: "",
+  remember: false,
+};
+let loading = ref(false);
+let errorMsg = ref("");
+
+function login(ev) {
+  ev.preventDefault();
+
+  loading.value = true;
+  store
+    .dispatch("login", user)
+    .then(() => {
+      loading.value = false;
+      router.push({
+        name: "Dashboard",
+      });
+    })
+    .catch((err) => {
+      loading.value = false;
+      errorMsg.value = err.response.data.error;
+    });
+}
 
 defineProps({
   msg: String,
@@ -61,6 +93,7 @@ const count = ref(0);
           name="email"
           type="email"
           autocomplete="email"
+          v-model="user.email"
           required=""
           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="Email address"
@@ -73,6 +106,7 @@ const count = ref(0);
           name="password"
           type="password"
           autocomplete="current-password"
+          v-model="user.password"
           required=""
           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
           placeholder="Password"
@@ -85,6 +119,7 @@ const count = ref(0);
         <input
           id="remember-me"
           name="remember-me"
+          v-model="user.remember"
           type="checkbox"
           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
         />
@@ -104,12 +139,7 @@ const count = ref(0);
           'hover:bg-indigo-500': loading,
         }"
       >
-        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-          <LockClosedIcon
-            class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-            aria-hidden="true"
-          />
-        </span>
+        <span class="absolute left-0 inset-y-0 flex items-center pl-3"> </span>
         <svg
           v-if="loading"
           class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
